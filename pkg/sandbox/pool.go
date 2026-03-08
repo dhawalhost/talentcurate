@@ -95,8 +95,8 @@ func (pm *PoolManager) spawn(lang string) (string, error) {
 
 	// Add persistent volume caching for Go compilation
 	if lang == "go" {
-		args = append(args, "-v", "spinvel-go-build-cache:/root/.cache/go-build")
-		args = append(args, "-v", "spinvel-go-mod-cache:/go/pkg/mod")
+		args = append(args, "-v", "talentcurate-go-build-cache:/root/.cache/go-build")
+		args = append(args, "-v", "talentcurate-go-mod-cache:/go/pkg/mod")
 	}
 
 	// Idle entrypoint

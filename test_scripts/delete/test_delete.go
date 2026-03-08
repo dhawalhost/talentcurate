@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	secret := []byte("spinvel_interview_secret_key_32_chars_min")
+	secret := []byte("talentcurate_interview_secret_key_32_chars_min")
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub":  "test-admin",
 		"role": "admin",

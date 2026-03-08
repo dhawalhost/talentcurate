@@ -45,11 +45,11 @@ func (h *Handler) CheckSSO(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// For the MVP, we will mock the SSO check logic.
-	// We'll say any email ending in "@spinvel.com" is SSO enabled except our default "hr@spinvel.com" and "admin@spinvel.com"
+	// We'll say any email ending in "@talentcurate.com" is SSO enabled except our default "hr@talentcurate.com" and "admin@talentcurate.com"
 	// In production, query the `users` or `organizations` table for an `sso_provider` column.
 
 	isSSO := false
-	if len(email) > 12 && email[len(email)-12:] == "@spinvel.com" && email != "hr@spinvel.com" && email != "admin@spinvel.com" {
+	if len(email) > 12 && email[len(email)-12:] == "@talentcurate.com" && email != "hr@talentcurate.com" && email != "admin@talentcurate.com" {
 		isSSO = true
 	}
 
@@ -84,7 +84,7 @@ func (h *Handler) HandleSSOCallback(w http.ResponseWriter, r *http.Request) {
 		if oauthConfig.ClientID == "mock_client_id" {
 			// DEV ONLY MOCK
 			userInfo = MockUserInfo{
-				Email: "mock_sso_user@spinvel.com",
+				Email: "mock_sso_user@talentcurate.com",
 				Name:  "Okta User",
 				Role:  "hr",
 			}
@@ -97,7 +97,7 @@ func (h *Handler) HandleSSOCallback(w http.ResponseWriter, r *http.Request) {
 		// We would use the token to fetch the user profile from the provider's UserInfo endpoint
 		// Using the simulated one for now to demonstrate success
 		userInfo = MockUserInfo{
-			Email: "sso_authorized@spinvel.com",
+			Email: "sso_authorized@talentcurate.com",
 			Name:  "Managed Okta User",
 			Role:  "hr",
 		}

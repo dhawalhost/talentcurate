@@ -13,6 +13,6 @@ func main() {
 		natsURL = "nats://localhost:4222"
 	}
 
-	log.Printf("Starting Spinvel Worker Node. Connecting to NATS at %s", natsURL)
+	log.Printf("Starting TalentCurate Worker Node. Connecting to NATS at %s", natsURL)
 	worker.RunDaemon(natsURL)
 }

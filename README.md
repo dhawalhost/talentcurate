@@ -138,7 +138,7 @@ Plus free-form feedback, hire/no-hire recommendation, and interview notes.
 
 ```bash
 # Clone the repository
-git clone https://github.com/spinvel/interview-system.git
+git clone https://github.com/dhawalhost/talentcurate.git
 cd interview-system
 
 # Set your Gemini API key (and optionally customize admin credentials)
@@ -168,7 +168,7 @@ On first startup, one admin account is seeded. Override via `.env` or `docker-co
 
 | Env Var | Default | Description |
 |---|---|---|
-| `ADMIN_EMAIL` | admin@spinvel.com | Admin login email |
+| `ADMIN_EMAIL` | admin@talentcurate.com | Admin login email |
 | `ADMIN_PASSWORD` | admin123 | Admin login password |
 | `ADMIN_NAME` | System Admin | Display name |
 
@@ -234,4 +234,4 @@ Proprietary. All rights reserved.
 
 ---
 
-**Built by [TalentCurate](https://spinvel.com)**
+**Built by [TalentCurate](https://talentcurate.com)**

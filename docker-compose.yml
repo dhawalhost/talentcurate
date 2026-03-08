@@ -25,12 +25,12 @@ services:
     environment:
       - NATS_URL=nats://nats:4222
       - LIVEKIT_API_KEY=devkey
-      - LIVEKIT_API_SECRET=spinvel_interview_secret_key_32_chars_min
+      - LIVEKIT_API_SECRET=talentcurate_interview_secret_key_32_chars_min
       - LIVEKIT_URL=http://livekit:7880
       - DATABASE_URL=postgres://interviewadmin:interviewpass@db:5432/interviewdb?sslmode=disable
-      - GEMINI_API_KEY=${GEMINI_API_KEY:-AIzaSyAF66GHV-KeOI1i38b1_dYL96I-xdxookA}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       # Bootstrap admin credentials — override these in production
-      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@spinvel.com}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@talentcurate.com}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
       - ADMIN_NAME=${ADMIN_NAME:-System Admin}
     ports:
@@ -74,7 +74,7 @@ services:
       - "7881:7881"
       - "50000-50010:50000-50010/udp"
     environment:
-      - 'LIVEKIT_KEYS=devkey: spinvel_interview_secret_key_32_chars_min'
+      - 'LIVEKIT_KEYS=devkey: talentcurate_interview_secret_key_32_chars_min'
     depends_on:
       - redis
 

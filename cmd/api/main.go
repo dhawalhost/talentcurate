@@ -32,7 +32,7 @@ func main() {
 	defer q.Close()
 
 	gw := gateway.NewGateway(addr, q)
-	log.Printf("Starting Spinvel API Gateway on port %s", port)
+	log.Printf("Starting TalentCurate API Gateway on port %s", port)
 	if err := gw.Start(); err != nil {
 		log.Fatalf("Server stopped: %v", err)
 	}

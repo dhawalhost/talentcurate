@@ -1,4 +1,4 @@
-# Spinvel Backend Dockerfile
+# TalentCurate Backend Dockerfile
 # This covers both API and Worker (using build targets)
 
 FROM golang:1.25-alpine AS builder

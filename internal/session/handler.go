@@ -144,7 +144,7 @@ func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
 	// Create a dummy user first just so the foreign key doesn't fail
 	_, err := db.Pool.Exec(context.Background(),
 		"INSERT INTO users (id, email, name, role) VALUES ($1, $2, $3, $4) ON CONFLICT (email) DO NOTHING",
-		interviewerUUID, "interviewer_"+sessionID+"@spinvel.com", "Interviewer", "interviewer")
+		interviewerUUID, "interviewer_"+sessionID+"@talentcurate.com", "Interviewer", "interviewer")
 
 	if err != nil {
 		http.Error(w, "failed to prep user data: "+err.Error(), http.StatusInternalServerError)
@@ -769,7 +769,7 @@ func (h *Handler) LoadQuestion(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) generateVideoToken(roomName, identity, name string, isAdmin bool, isObserver bool) (string, error) {
 	apiKey := "devkey"
-	apiSecret := "spinvel_interview_secret_key_32_chars_min"
+	apiSecret := "talentcurate_interview_secret_key_32_chars_min"
 
 	at := lkauth.NewAccessToken(apiKey, apiSecret)
 	grant := &lkauth.VideoGrant{

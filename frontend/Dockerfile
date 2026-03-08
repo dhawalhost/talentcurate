@@ -1,4 +1,4 @@
-# Spinvel Frontend Dockerfile
+# TalentCurate Frontend Dockerfile
 FROM node:22-alpine AS builder
 WORKDIR /app
 COPY frontend/package*.json ./

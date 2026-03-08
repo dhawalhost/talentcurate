@@ -9,4 +9,4 @@ rtc:
 redis:
   address: redis:6379
 keys:
-  devkey: spinvel_interview_secret_key_32_chars_min
+  devkey: talentcurate_interview_secret_key_32_chars_min

@@ -1,5 +1,5 @@
 api_key: devkey
-api_secret: spinvel_interview_secret_key_32_chars_min
+api_secret: talentcurate_interview_secret_key_32_chars_min
 ws_url: ws://livekit:7880
 log_level: debug
 health_check_interval: 0

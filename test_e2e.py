@@ -5,7 +5,7 @@ import json
 import time
 
 async def test_e2e():
-    print("🚀 Starting Spinvel Backend E2E Test")
+    print("🚀 Starting TalentCurate Backend E2E Test")
     
     async with aiohttp.ClientSession() as session:
         # 1. Create Interview Session
@@ -13,7 +13,7 @@ async def test_e2e():
         payload = {
             "title": "E2E Test Session",
             "interviewer_id": "test_int",
-            "candidate_email": "e2e@spinvel.com",
+            "candidate_email": "e2e@talentcurate.com",
             "language_preset": "python3"
         }
         async with session.post("http://localhost:8080/api/v1/sessions", json=payload) as resp:

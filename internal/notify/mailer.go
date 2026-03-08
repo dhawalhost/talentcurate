@@ -9,7 +9,7 @@ import (
 func SendInvitation(name string, email string, joinUrl string, role string) {
 	log.Printf("\n=======================================================\n")
 	log.Printf("[EMAIL SENT] To: %s (%s)\n", name, email)
-	log.Printf("Subject: You're invited to a Spinvel Interview (%s)\n", role)
+	log.Printf("Subject: You're invited to a TalentCurate Interview (%s)\n", role)
 	log.Printf("Body:\n")
 	log.Printf("Hello %s,\n\nYou have been invited to join a technical interview session.\n", name)
 	log.Printf("Please click the link below to join your secure room:\n")

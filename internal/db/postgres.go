@@ -244,7 +244,7 @@ func getEnvOrDefault(key, fallback string) string {
 // This is the only user seeded at startup — the admin can create all other users
 // (HR, interviewers, additional admins) via the Admin Dashboard.
 func seedAdminUsers() error {
-	email := getEnvOrDefault("ADMIN_EMAIL", "admin@spinvel.com")
+	email := getEnvOrDefault("ADMIN_EMAIL", "admin@talentcurate.com")
 	password := getEnvOrDefault("ADMIN_PASSWORD", "admin123")
 	name := getEnvOrDefault("ADMIN_NAME", "System Admin")
 
