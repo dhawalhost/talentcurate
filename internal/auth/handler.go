@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/spinvel/interview-system/internal/db"
+	"github.com/dhawalhost/talentcurate/internal/db"
 )
 
 var JWTSecret = []byte(getEnv("JWT_SECRET", "super_secret_dev_key"))

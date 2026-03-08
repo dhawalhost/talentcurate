@@ -7,13 +7,13 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/spinvel/interview-system/internal/auth"
-	"github.com/spinvel/interview-system/internal/collaboration"
-	"github.com/spinvel/interview-system/internal/execution/models"
-	"github.com/spinvel/interview-system/internal/question"
-	"github.com/spinvel/interview-system/internal/session"
-	"github.com/spinvel/interview-system/internal/user"
-	"github.com/spinvel/interview-system/pkg/queue"
+	"github.com/dhawalhost/talentcurate/internal/auth"
+	"github.com/dhawalhost/talentcurate/internal/collaboration"
+	"github.com/dhawalhost/talentcurate/internal/execution/models"
+	"github.com/dhawalhost/talentcurate/internal/question"
+	"github.com/dhawalhost/talentcurate/internal/session"
+	"github.com/dhawalhost/talentcurate/internal/user"
+	"github.com/dhawalhost/talentcurate/pkg/queue"
 )
 
 type Gateway struct {

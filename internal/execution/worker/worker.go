@@ -9,9 +9,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/spinvel/interview-system/internal/execution/models"
-	"github.com/spinvel/interview-system/pkg/queue"
-	"github.com/spinvel/interview-system/pkg/sandbox"
+	"github.com/dhawalhost/talentcurate/internal/execution/models"
+	"github.com/dhawalhost/talentcurate/pkg/queue"
+	"github.com/dhawalhost/talentcurate/pkg/sandbox"
 )
 
 type Worker struct {

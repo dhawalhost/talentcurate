@@ -1,4 +1,4 @@
-module github.com/spinvel/interview-system
+module github.com/dhawalhost/talentcurate
 
 go 1.25.0
 

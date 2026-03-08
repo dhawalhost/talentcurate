@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/oauth2"
 
-	"github.com/spinvel/interview-system/internal/db"
+	"github.com/dhawalhost/talentcurate/internal/db"
 )
 
 var (

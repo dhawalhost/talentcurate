@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/spinvel/interview-system/internal/db"
+	"github.com/dhawalhost/talentcurate/internal/db"
 )
 
 // --- Calendar Event Models ---

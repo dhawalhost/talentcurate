@@ -4,9 +4,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/spinvel/interview-system/internal/db"
-	"github.com/spinvel/interview-system/internal/gateway"
-	"github.com/spinvel/interview-system/pkg/queue"
+	"github.com/dhawalhost/talentcurate/internal/db"
+	"github.com/dhawalhost/talentcurate/internal/gateway"
+	"github.com/dhawalhost/talentcurate/pkg/queue"
 )
 
 func main() {

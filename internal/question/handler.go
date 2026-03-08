@@ -10,7 +10,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v5"
-	"github.com/spinvel/interview-system/internal/db"
+	"github.com/dhawalhost/talentcurate/internal/db"
 )
 
 type Handler struct{}

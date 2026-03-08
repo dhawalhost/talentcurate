@@ -12,7 +12,7 @@ import (
 	"github.com/gorilla/mux"
 	lkauth "github.com/livekit/protocol/auth"
 
-	localauth "github.com/spinvel/interview-system/internal/auth"
+	localauth "github.com/dhawalhost/talentcurate/internal/auth"
 
 	"os"
 
@@ -27,8 +27,8 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"google.golang.org/api/option"
 
-	"github.com/spinvel/interview-system/internal/db"
-	"github.com/spinvel/interview-system/internal/notify"
+	"github.com/dhawalhost/talentcurate/internal/db"
+	"github.com/dhawalhost/talentcurate/internal/notify"
 )
 
 // Models

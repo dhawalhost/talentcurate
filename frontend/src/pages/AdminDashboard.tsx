@@ -217,7 +217,7 @@ export default function AdminDashboard() {
                                                     value={user.role}
                                                     onChange={e => handleUpdateRole(user.id, e.target.value)}
                                                     className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer hover:bg-white hover:border-black transition-all disabled:opacity-30 appearance-none text-center"
-                                                    disabled={user.email === 'dhawalhost@gmail.com'}
+                                                    disabled={user.email === 'admin@talentcurate.com'}
                                                 >
                                                     <option value="interviewer">INTERVIEWER</option>
                                                     <option value="hr">RECRUITER</option>

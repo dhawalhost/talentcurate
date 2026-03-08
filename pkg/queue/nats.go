@@ -8,7 +8,7 @@ import (
 
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
-	"github.com/spinvel/interview-system/internal/execution/models"
+	"github.com/dhawalhost/talentcurate/internal/execution/models"
 )
 
 const (

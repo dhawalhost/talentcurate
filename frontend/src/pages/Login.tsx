@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1';
 
 export default function Login() {
-    const [email, setEmail] = useState('dhawalhost@gmail.com');
+    const [email, setEmail] = useState('admin@talentcurate.com');
     const [password, setPassword] = useState('password');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');

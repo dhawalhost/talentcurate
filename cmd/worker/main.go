@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/spinvel/interview-system/internal/execution/worker"
+	"github.com/dhawalhost/talentcurate/internal/execution/worker"
 )
 
 func main() {
