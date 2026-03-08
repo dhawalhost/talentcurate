@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Spinvel MVP Test</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; gap: 10px; padding: 20px;}
+        textarea { width: 100%; height: 200px; font-family: monospace; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        pre { background: #f4f4f4; padding: 10px; border: 1px solid #ddd; min-height: 100px; white-space: pre-wrap; }
+        button { padding: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Spinvel MVP Flow</h1>
+    
+    <div>
+        <button onclick="createSession()">1. Create Session</button>
+        <span id="sessionStatus"></span>
+    </div>
+
+    <div class="grid">
+        <div>
+            <h3>Candidate Source (Python for test)</h3>
+            <textarea id="sourceCode">def solve():
+    print("Test passed!")
+    return True
+
+solve()</textarea>
+            <button onclick="triggerExecution()">2. Run Code</button>
+        </div>
+        <div>
+            <h3>Collaboration WebSocket Log</h3>
+            <pre id="wsLog"></pre>
+        </div>
+    </div>
+
+    <div>
+        <h3>Execution Result Pipeline</h3>
+        <pre id="execOutput"></pre>
+    </div>
+
+    <script>
+        let currentSessionId = "";
+        let ws = null;
+
+        function logWS(msg) {
+            const el = document.getElementById("wsLog");
+            el.innerText += msg + "\n";
+            el.scrollTop = el.scrollHeight;
+        }
+
+        async function createSession() {
+            const res = await fetch("/api/v1/sessions", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    title: "Test Session",
+                    interviewer_id: "int_1",
+                    candidate_email: "test@test.com",
+                    language_preset: "python3"
+                })
+            });
+            const data = await res.json();
+            currentSessionId = data.session_id;
+            document.getElementById("sessionStatus").innerText = `Session Created: ${currentSessionId}`;
+            
+            // Connect WS
+            if (ws) ws.close();
+            ws = new WebSocket(`ws://${location.host}/collab/${currentSessionId}`);
+            
+            ws.onopen = () => logWS("Connected to Collaboration Hub");
+            ws.onmessage = (evt) => {
+                logWS("Received Event: " + evt.data);
+                // Also parse result if it's execution data
+                try {
+                    const parsed = JSON.parse(evt.data);
+                    if (parsed.status === "COMPLETED" || parsed.status === "ERROR") {
+                        document.getElementById("execOutput").innerText = JSON.stringify(parsed, null, 2);
+                    }
+                } catch(e) {}
+            };
+            ws.onerror = (e) => logWS("WS Error");
+            ws.onclose = () => logWS("WS Closed");
+        }
+
+        async function triggerExecution() {
+            if (!currentSessionId) return alert("Create session first");
+            const code = document.getElementById("sourceCode").value;
+            
+            document.getElementById("execOutput").innerText = "Executing...";
+
+            const res = await fetch(`/api/v1/sessions/${currentSessionId}/execute`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    language: "python3",
+                    source_code: code,
+                    test_cases: []
+                })
+            });
+            const data = await res.json();
+            logWS(`Execution Triggered HTTP: ${data.execution_id}`);
+        }
+    </script>
+</body>
+</html>

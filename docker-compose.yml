@@ -1,0 +1,128 @@
+services:
+  nats:
+    image: nats:latest
+    command: "-js"
+    ports:
+      - "4222:4222"
+      - "8222:8222" # Monitor port
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=interviewadmin
+      - POSTGRES_PASSWORD=interviewpass
+      - POSTGRES_DB=interviewdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+      target: api
+    environment:
+      - NATS_URL=nats://nats:4222
+      - LIVEKIT_API_KEY=devkey
+      - LIVEKIT_API_SECRET=spinvel_interview_secret_key_32_chars_min
+      - LIVEKIT_URL=http://livekit:7880
+      - DATABASE_URL=postgres://interviewadmin:interviewpass@db:5432/interviewdb?sslmode=disable
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-AIzaSyAF66GHV-KeOI1i38b1_dYL96I-xdxookA}
+      # Bootstrap admin credentials — override these in production
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@spinvel.com}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
+      - ADMIN_NAME=${ADMIN_NAME:-System Admin}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - nats
+      - livekit
+      - db
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+      target: worker
+    environment:
+      - NATS_URL=nats://nats:4222
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/sandbox:/tmp/sandbox
+
+    privileged: true # Only if using dind, otherwise just sock volume is enough
+    depends_on:
+      - nats
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "8085:80"
+    depends_on:
+      - api-gateway
+
+  livekit:
+    image: livekit/livekit-server:latest
+    command: --config /livekit.yaml
+    volumes:
+      - ./livekit.yaml:/livekit.yaml
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "50000-50010:50000-50010/udp"
+    environment:
+      - 'LIVEKIT_KEYS=devkey: spinvel_interview_secret_key_32_chars_min'
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+  minio-setup:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set local http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb --ignore-existing local/recordings;
+      /usr/bin/mc anonymous set public local/recordings;
+      exit 0;
+      "
+
+  livekit-egress:
+    image: livekit/egress:latest
+    environment:
+      - EGRESS_CONFIG_FILE=/out/egress.yaml
+      - LIVEKIT_INSECURE=true
+    volumes:
+      - ./egress.yaml:/out/egress.yaml
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+    depends_on:
+      - livekit
+      - redis
+      - minio
+
+volumes:
+  postgres_data:
+  minio_data:

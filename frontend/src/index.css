@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+@theme {
+  /* Black & White Light Theme */
+  --color-background: #ffffff;
+  --color-surface-glass: rgba(255, 255, 255, 0.7);
+  --color-surface-glass-bright: rgba(255, 255, 255, 0.9);
+  --color-surface-elevated: #f8fafc;
+
+  /* Primary High-Contrast Accents */
+  --color-primary: #000000;
+  --color-primary-hover: #1e293b;
+  --color-accent: #000000;
+  --color-accent-hover: #1e293b;
+
+  /* Status Colors */
+  --color-emerald: #059669;
+  --color-rose: #dc2626;
+  --color-amber: #d97706;
+  --color-blue: #2563eb;
+
+  /* Text */
+  --color-text-main: #000000;
+  --color-text-muted: #475569;
+  --color-text-dim: #94a3b8;
+
+  /* Transitions */
+  --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Shadows - Defined here to avoid @apply space issues */
+  --shadow-glass: 0 4px 24px rgba(0, 0, 0, 0.04);
+  --shadow-glass-hover: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --shadow-flat: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+@layer base {
+  body {
+    @apply bg-background text-text-main antialiased h-screen overflow-hidden selection:bg-black selection:text-white;
+    font-family: 'Inter', 'Outfit', system-ui, -apple-system, sans-serif;
+    background-color: #ffffff;
+    background-image:
+      radial-gradient(at 0% 0%, hsla(210, 100%, 98%, 1) 0, transparent 50%),
+      radial-gradient(at 50% 0%, hsla(225, 100%, 99%, 1) 0, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(339, 0%, 100%, 1) 0, transparent 50%);
+  }
+}
+
+@layer components {
+  .liquid-glass {
+    @apply bg-surface-glass border border-black/5 shadow-glass;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    transition: var(--transition-smooth);
+  }
+
+  .liquid-glass:hover {
+    @apply bg-white border-black/10 shadow-glass-hover;
+  }
+
+  .glass-card {
+    @apply bg-surface-glass border border-black/5 shadow-glass rounded-2xl p-6;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    transition: var(--transition-smooth);
+  }
+
+  .glass-card:hover {
+    @apply bg-white border-black/10 shadow-glass-hover;
+  }
+
+  .text-gradient {
+    @apply text-black;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-white/70 backdrop-blur-xl border border-black/5 shadow-sm;
+  }
+
+  .glass-panel-elevated {
+    @apply bg-white backdrop-blur-2xl border border-black/10 shadow-md;
+  }
+
+  .font-space {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+
+  .glow-primary {
+    @apply shadow-flat;
+  }
+
+  .glow-accent {
+    @apply shadow-flat;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Custom LiveKit Theme Overrides */
+.custom-lk-theme {
+  --lk-bg: #f8fafc;
+  --lk-control-bar-bg: rgba(255, 255, 255, 0.8);
+  --lk-text-color: #000000;
+}
+
+.custom-lk-theme .lk-participant-tile {
+  border-radius: 1rem !important;
+  overflow: hidden !important;
+  box-shadow: var(--shadow-flat) !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  background-color: #ffffff !important;
+}
+
+.custom-lk-theme .lk-button {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 0.75rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.custom-lk-theme .lk-button:hover {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.custom-lk-theme .lk-control-bar {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
+}

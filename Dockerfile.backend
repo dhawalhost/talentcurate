@@ -1,0 +1,25 @@
+# Spinvel Backend Dockerfile
+# This covers both API and Worker (using build targets)
+
+FROM golang:1.25-alpine AS builder
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN go build -o api ./cmd/api/main.go
+RUN go build -o worker ./cmd/worker/main.go
+
+# API Service
+FROM alpine:latest AS api
+WORKDIR /app
+COPY --from=builder /app/api .
+EXPOSE 8080
+CMD ["./api"]
+
+# Worker Service (Needs Docker socket for sandbox)
+FROM docker:dind AS worker
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+COPY --from=builder /app/worker .
+# Worker requires access to docker socket or dind
+CMD ["./worker"]
