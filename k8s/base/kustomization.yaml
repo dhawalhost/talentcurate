@@ -1,0 +1,31 @@
+resources:
+labels:
+  - includeSelectors: true
+    pairs:
+      app.kubernetes.io/name: talentcurate
+      app.kubernetes.io/part-of: talentcurate-platform
+- 01-configmap.yaml
+- 02-secret.yaml
+- api-gateway-deployment.yaml
+- api-gateway-service.yaml
+- db-deployment.yaml
+- db-service.yaml
+- frontend-deployment.yaml
+- frontend-service.yaml
+- livekit-cm0-configmap.yaml
+- livekit-deployment.yaml
+- livekit-egress-cm0-configmap.yaml
+- livekit-egress-deployment.yaml
+- livekit-service.yaml
+- minio-data-persistentvolumeclaim.yaml
+- minio-deployment.yaml
+- minio-service.yaml
+- minio-setup-deployment.yaml
+- nats-deployment.yaml
+- nats-service.yaml
+- postgres-data-persistentvolumeclaim.yaml
+- redis-deployment.yaml
+- redis-service.yaml
+- worker-claim1-persistentvolumeclaim.yaml
+- worker-deployment.yaml
+- worker-metrics-service.yaml

@@ -242,6 +242,7 @@ type SessionSummary struct {
 	ScoreSystemDesign  int       `json:"score_system_design,omitempty"`
 	AISummary          string    `json:"ai_summary,omitempty"`
 	RecordingURL       string    `json:"recording_url,omitempty"`
+	InterviewType      string    `json:"interview_type,omitempty"`
 }
 
 func (h *Handler) GetAllSessions(w http.ResponseWriter, r *http.Request) {
@@ -257,7 +258,7 @@ func (h *Handler) GetAllSessions(w http.ResponseWriter, r *http.Request) {
 
 	if cursor != "" {
 		query := `
-			SELECT id, title, candidate_email, COALESCE(candidate_name, ''), status, created_at, COALESCE(hire_recommendation, ''), COALESCE(score_algorithms, 0), COALESCE(score_code_quality, 0), COALESCE(score_communication, 0), COALESCE(score_system_design, 0), COALESCE(ai_summary, ''), COALESCE(recording_url, '')
+			SELECT id, title, candidate_email, COALESCE(candidate_name, ''), status, created_at, COALESCE(hire_recommendation, ''), COALESCE(score_algorithms, 0), COALESCE(score_code_quality, 0), COALESCE(score_communication, 0), COALESCE(score_system_design, 0), COALESCE(ai_summary, ''), COALESCE(recording_url, ''), COALESCE(interview_type, 'technical')
 			FROM sessions 
 			WHERE created_at < $1
 			ORDER BY created_at DESC
@@ -266,7 +267,7 @@ func (h *Handler) GetAllSessions(w http.ResponseWriter, r *http.Request) {
 		rows, err = db.Pool.Query(context.Background(), query, cursor, limit)
 	} else {
 		query := `
-			SELECT id, title, candidate_email, COALESCE(candidate_name, ''), status, created_at, COALESCE(hire_recommendation, ''), COALESCE(score_algorithms, 0), COALESCE(score_code_quality, 0), COALESCE(score_communication, 0), COALESCE(score_system_design, 0), COALESCE(ai_summary, ''), COALESCE(recording_url, '')
+			SELECT id, title, candidate_email, COALESCE(candidate_name, ''), status, created_at, COALESCE(hire_recommendation, ''), COALESCE(score_algorithms, 0), COALESCE(score_code_quality, 0), COALESCE(score_communication, 0), COALESCE(score_system_design, 0), COALESCE(ai_summary, ''), COALESCE(recording_url, ''), COALESCE(interview_type, 'technical')
 			FROM sessions 
 			ORDER BY created_at DESC
 			LIMIT $1
@@ -283,7 +284,7 @@ func (h *Handler) GetAllSessions(w http.ResponseWriter, r *http.Request) {
 	var sessions []SessionSummary
 	for rows.Next() {
 		var s SessionSummary
-		if err := rows.Scan(&s.ID, &s.Title, &s.Candidate, &s.CandidateName, &s.Status, &s.CreatedAt, &s.HireRecommendation, &s.ScoreAlgorithms, &s.ScoreCodeQuality, &s.ScoreCommunication, &s.ScoreSystemDesign, &s.AISummary, &s.RecordingURL); err != nil {
+		if err := rows.Scan(&s.ID, &s.Title, &s.Candidate, &s.CandidateName, &s.Status, &s.CreatedAt, &s.HireRecommendation, &s.ScoreAlgorithms, &s.ScoreCodeQuality, &s.ScoreCommunication, &s.ScoreSystemDesign, &s.AISummary, &s.RecordingURL, &s.InterviewType); err != nil {
 			http.Error(w, "failed to parse sessions: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -308,13 +309,13 @@ func (h *Handler) GetSession(w http.ResponseWriter, r *http.Request) {
 	sessionID := vars["session_id"]
 
 	query := `
-		SELECT id, title, candidate_email, COALESCE(candidate_name, ''), status, created_at, COALESCE(language_preset, ''), COALESCE(feedback, ''), COALESCE(hire_recommendation, ''), COALESCE(score_algorithms, 0), COALESCE(score_code_quality, 0), COALESCE(score_communication, 0), COALESCE(score_system_design, 0), COALESCE(ai_summary, ''), COALESCE(recording_url, '')
+		SELECT id, title, candidate_email, COALESCE(candidate_name, ''), status, created_at, COALESCE(language_preset, ''), COALESCE(feedback, ''), COALESCE(hire_recommendation, ''), COALESCE(score_algorithms, 0), COALESCE(score_code_quality, 0), COALESCE(score_communication, 0), COALESCE(score_system_design, 0), COALESCE(ai_summary, ''), COALESCE(recording_url, ''), COALESCE(interview_type, 'technical')
 		FROM sessions WHERE id = $1
 	`
 	var sess Session
 	var langPreset string
 	err := db.Pool.QueryRow(context.Background(), query, sessionID).Scan(
-		&sess.SessionID, &sess.Title, &sess.CandidateEmail, &sess.CandidateName, &sess.Status, &sess.StartTime, &langPreset, &sess.Feedback, &sess.HireRecommendation, &sess.ScoreAlgorithms, &sess.ScoreCodeQuality, &sess.ScoreCommunication, &sess.ScoreSystemDesign, &sess.AISummary, &sess.RecordingURL,
+		&sess.SessionID, &sess.Title, &sess.CandidateEmail, &sess.CandidateName, &sess.Status, &sess.StartTime, &langPreset, &sess.Feedback, &sess.HireRecommendation, &sess.ScoreAlgorithms, &sess.ScoreCodeQuality, &sess.ScoreCommunication, &sess.ScoreSystemDesign, &sess.AISummary, &sess.RecordingURL, &sess.InterviewType,
 	)
 
 	if err != nil {

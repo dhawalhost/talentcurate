@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nats
+spec:
+  replicas: 1
+  selector:
+  template:
+    metadata:
+    spec:
+      containers:
+        - args:
+            - -js
+          image: nats:latest
+          name: nats
+          ports:
+            - containerPort: 4222
+              protocol: TCP
+            - containerPort: 8222
+              protocol: TCP
+      restartPolicy: Always

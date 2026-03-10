@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+spec:
+  replicas: 1
+  selector:
+  template:
+    metadata:
+    spec:
+      containers:
+        - env:
+            - name: ADMIN_EMAIL
+              valueFrom:
+                configMapKeyRef:
+                  name: talentcurate-config
+                  key: ADMIN_EMAIL
+            - name: ADMIN_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: talentcurate-config
+                  key: ADMIN_NAME
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: talentcurate-secrets
+                  key: ADMIN_PASSWORD
+            - name: DATABASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: talentcurate-config
+                  key: DATABASE_URL
+            - name: GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: talentcurate-secrets
+                  key: GEMINI_API_KEY
+            - name: LIVEKIT_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: talentcurate-secrets
+                  key: LIVEKIT_API_KEY
+            - name: LIVEKIT_API_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: talentcurate-secrets
+                  key: LIVEKIT_API_SECRET
+            - name: LIVEKIT_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: talentcurate-config
+                  key: LIVEKIT_URL
+            - name: NATS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: talentcurate-config
+                  key: NATS_URL
+          image: api-gateway
+          name: api-gateway
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+      restartPolicy: Always

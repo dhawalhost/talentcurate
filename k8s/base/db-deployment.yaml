@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+spec:
+  replicas: 1
+  selector:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+    spec:
+      containers:
+        - env:
+            - name: POSTGRES_DB
+              value: interviewdb
+            - name: POSTGRES_PASSWORD
+              value: interviewpass
+            - name: POSTGRES_USER
+              value: interviewadmin
+          image: postgres:15-alpine
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready -U interviewadmin -d interviewdb
+            failureThreshold: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+          name: db
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgres-data
+      restartPolicy: Always
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: postgres-data

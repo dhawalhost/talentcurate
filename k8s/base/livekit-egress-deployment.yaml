@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: livekit-egress
+spec:
+  replicas: 1
+  selector:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+    spec:
+      containers:
+        - env:
+            - name: EGRESS_CONFIG_FILE
+              value: /out/egress.yaml
+            - name: LIVEKIT_INSECURE
+              value: "true"
+          image: livekit/egress:latest
+          name: livekit-egress
+          resources:
+            limits:
+              cpu: "2"
+          volumeMounts:
+            - mountPath: /out/egress.yaml
+              name: livekit-egress-cm0
+              subPath: egress.yaml
+      restartPolicy: Always
+      volumes:
+        - configMap:
+            items:
+              - key: egress.yaml
+                path: egress.yaml
+            name: livekit-egress-cm0
+          name: livekit-egress-cm0

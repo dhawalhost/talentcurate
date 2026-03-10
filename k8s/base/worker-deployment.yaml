@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+spec:
+  replicas: 1
+  selector:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+    spec:
+      containers:
+        - env:
+            - name: NATS_URL
+              value: nats://nats:4222
+          image: worker
+          name: worker
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: 9090
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: 9090
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          ports:
+            - containerPort: 9090
+              name: metrics
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - mountPath: /tmp/sandbox
+              name: worker-claim1
+      restartPolicy: Always
+      volumes:
+        - name: worker-claim1
+          persistentVolumeClaim:
+            claimName: worker-claim1

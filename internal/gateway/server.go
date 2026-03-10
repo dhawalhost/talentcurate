@@ -3,10 +3,10 @@ package gateway
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
 	"github.com/dhawalhost/talentcurate/internal/auth"
 	"github.com/dhawalhost/talentcurate/internal/collaboration"
 	"github.com/dhawalhost/talentcurate/internal/execution/models"
@@ -14,6 +14,23 @@ import (
 	"github.com/dhawalhost/talentcurate/internal/session"
 	"github.com/dhawalhost/talentcurate/internal/user"
 	"github.com/dhawalhost/talentcurate/pkg/queue"
+	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+)
+
+var (
+	httpRequestsTotal = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "http_requests_total",
+		Help: "Total number of HTTP requests.",
+	}, []string{"method", "endpoint", "status"})
+
+	httpRequestDuration = promauto.NewHistogramVec(prometheus.HistogramOpts{
+		Name:    "http_request_duration_seconds",
+		Help:    "Duration of HTTP requests in seconds.",
+		Buckets: prometheus.DefBuckets,
+	}, []string{"method", "endpoint"})
 )
 
 type Gateway struct {
@@ -41,7 +58,7 @@ func NewGateway(addr string, q queue.ExecutionQueue) *Gateway {
 			next.ServeHTTP(w, r)
 		})
 	}
-	// Panic Recovery Middleware
+	// Panice Recovery Middleware
 	recoveryMiddleware := func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			defer func() {
@@ -51,6 +68,20 @@ func NewGateway(addr string, q queue.ExecutionQueue) *Gateway {
 				}
 			}()
 			next.ServeHTTP(w, r)
+		})
+	}
+
+	// Metrics Middleware
+	metricsMiddleware := func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			timer := prometheus.NewTimer(httpRequestDuration.WithLabelValues(r.Method, r.URL.Path))
+			defer timer.ObserveDuration()
+
+			// Wrapper to capture status code
+			ww := &statusResponseWriter{ResponseWriter: w, status: http.StatusOK}
+			next.ServeHTTP(ww, r)
+
+			httpRequestsTotal.WithLabelValues(r.Method, r.URL.Path, fmt.Sprintf("%d", ww.status)).Inc()
 		})
 	}
 
@@ -65,6 +96,9 @@ func NewGateway(addr string, q queue.ExecutionQueue) *Gateway {
 
 	// Subscribe to execution results broadcast from Workers
 	gw.Queue.SubscribeToResults(context.Background(), gw.handleExecutionResult)
+
+	// Metrics endpoint
+	router.Handle("/metrics", promhttp.Handler())
 
 	// Mount Sub-Services
 	gw.SessionSvc.RegisterRoutes(router)
@@ -81,10 +115,20 @@ func NewGateway(addr string, q queue.ExecutionQueue) *Gateway {
 
 	gw.HTTPServer = &http.Server{
 		Addr:    addr,
-		Handler: corsRouter(recoveryMiddleware(router)),
+		Handler: corsRouter(metricsMiddleware(recoveryMiddleware(router))),
 	}
 
 	return gw
+}
+
+type statusResponseWriter struct {
+	http.ResponseWriter
+	status int
+}
+
+func (w *statusResponseWriter) WriteHeader(code int) {
+	w.status = code
+	w.ResponseWriter.WriteHeader(code)
 }
 
 func (g *Gateway) handleExecute(w http.ResponseWriter, r *http.Request) {

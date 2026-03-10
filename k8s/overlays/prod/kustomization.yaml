@@ -1,0 +1,9 @@
+resources:
+- ../../base
+
+namespace: talentcurate-prod
+
+labels:
+  - includeSelectors: true
+    pairs:
+      variant: production

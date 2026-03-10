@@ -93,6 +93,7 @@ func runMigrations() error {
 		candidate_email VARCHAR(255) NOT NULL,
 		status session_status DEFAULT 'scheduled',
 		scheduled_for TIMESTAMP WITH TIME ZONE,
+		interview_type VARCHAR(50) DEFAULT 'technical',
 		created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 	);
 	`
@@ -108,6 +109,9 @@ func runMigrations() error {
 
 	// Ensure the language_preset column exists (added in Phase 8 fix)
 	_, _ = Pool.Exec(context.Background(), "ALTER TABLE sessions ADD COLUMN IF NOT EXISTS language_preset VARCHAR(50) DEFAULT 'python3'")
+
+	// Ensure the interview_type column exists (added in Phase 42 fix)
+	_, _ = Pool.Exec(context.Background(), "ALTER TABLE sessions ADD COLUMN IF NOT EXISTS interview_type VARCHAR(50) DEFAULT 'technical'")
 
 	// Ensure feedback and hire_recommendation columns exist (added in Phase 10)
 	_, _ = Pool.Exec(context.Background(), "ALTER TABLE sessions ADD COLUMN IF NOT EXISTS feedback TEXT")

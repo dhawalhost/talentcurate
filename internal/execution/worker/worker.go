@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,6 +13,22 @@ import (
 	"github.com/dhawalhost/talentcurate/internal/execution/models"
 	"github.com/dhawalhost/talentcurate/pkg/queue"
 	"github.com/dhawalhost/talentcurate/pkg/sandbox"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+)
+
+var (
+	jobsTotal = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "worker_jobs_total",
+		Help: "Total number of execution jobs processed.",
+	}, []string{"language", "status"})
+
+	jobDuration = promauto.NewHistogramVec(prometheus.HistogramOpts{
+		Name:    "worker_job_duration_seconds",
+		Help:    "Duration of execution jobs in seconds.",
+		Buckets: prometheus.DefBuckets,
+	}, []string{"language"})
 )
 
 type Worker struct {
@@ -37,7 +54,12 @@ func (w *Worker) Start(ctx context.Context) error {
 		// 2. Perform Execution
 		start := time.Now()
 		res := w.executeJob(handlerCtx, req)
-		res.RuntimeMs = int(time.Since(start).Milliseconds())
+		duration := time.Since(start).Seconds()
+		res.RuntimeMs = int(duration * 1000)
+
+		// Record Metrics
+		jobDuration.WithLabelValues(req.Language).Observe(duration)
+		jobsTotal.WithLabelValues(req.Language, res.Status).Inc()
 
 		// 3. Publish Result
 		if err := w.queue.PublishResult(handlerCtx, res); err != nil {
@@ -138,6 +160,19 @@ func RunDaemon(natsURL string) {
 		NetworkDisable: true,
 	}
 	pm := sandbox.NewPoolManager(limits, 2) // Cache 2 warm containers per language
+
+	// Start metrics server
+	metricsPort := os.Getenv("METRICS_PORT")
+	if metricsPort == "" {
+		metricsPort = "9090"
+	}
+	go func() {
+		log.Printf("Starting worker metrics server on port %s", metricsPort)
+		http.Handle("/metrics", promhttp.Handler())
+		if err := http.ListenAndServe(":"+metricsPort, nil); err != nil {
+			log.Printf("Metrics server failed: %v", err)
+		}
+	}()
 
 	w := NewWorker(q, pm)
 

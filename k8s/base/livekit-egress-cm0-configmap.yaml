@@ -1,0 +1,23 @@
+apiVersion: v1
+data:
+  egress.yaml: |
+    api_key: devkey
+    api_secret: talentcurate_interview_secret_key_32_chars_min
+    ws_url: ws://livekit:7880
+    log_level: debug
+    health_check_interval: 0
+    status_port: 8081
+    redis:
+      address: redis:6379
+    s3:
+      access_key: minioadmin
+      secret: minioadmin
+      region: us-east-1
+      endpoint: http://minio:9000
+      bucket: recordings
+      force_path_style: true
+kind: ConfigMap
+metadata:
+  annotations:
+    use-subpath: "true"
+  name: livekit-egress-cm0

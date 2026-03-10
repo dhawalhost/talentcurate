@@ -1,0 +1,9 @@
+resources:
+- ../../base
+
+namespace: talentcurate-dev
+
+labels:
+  - includeSelectors: true
+    pairs:
+      variant: development
