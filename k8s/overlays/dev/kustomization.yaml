@@ -7,3 +7,19 @@ labels:
   - includeSelectors: true
     pairs:
       variant: development
+
+patches:
+- target:
+    kind: Ingress
+    name: talentcurate-ingress
+  patch: |-
+    - op: replace
+      path: /spec/rules/0/host
+      value: dev.talentcurate.local
+- target:
+    kind: Ingress
+    name: landing-ingress
+  patch: |-
+    - op: replace
+      path: /spec/rules/0/host
+      value: landing.dev.talentcurate.local

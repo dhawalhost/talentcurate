@@ -7,3 +7,5 @@ labels:
   - includeSelectors: true
     pairs:
       variant: production
+
+# Base ingress.yaml defaults to app.talentcurate.com and talentcurate.com

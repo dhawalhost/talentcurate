@@ -29,3 +29,4 @@ labels:
 - worker-claim1-persistentvolumeclaim.yaml
 - worker-deployment.yaml
 - worker-metrics-service.yaml
+- ingress.yaml

@@ -1,0 +1,151 @@
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  main: frontend
+  description: 
+    en_us: "TalentCurate: Enterprise-grade interview platform with real-time video, collaborative coding, and AI-driven assessments."
+  tagline:
+    en_us: "Modern Interview Platform"
+  developer: "dhawalhost"
+  author: "dhawalhost"
+  icon: "https://raw.githubusercontent.com/dhawalhost/talentcurate/main/frontend/public/logo.png"
+  thumbnail: ""
+  title:
+    en_us: "TalentCurate"
+
+services:
+  nats:
+    image: nats:latest
+    command: "-js"
+    restart: unless-stopped
+    x-casaos:
+      envs:
+        - name: NATS_JS
+          value: "true"
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=interviewadmin
+      - POSTGRES_PASSWORD=interviewpass
+      - POSTGRES_DB=interviewdb
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U interviewadmin -d interviewdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api-gateway:
+    image: ghcr.io/dhawalhost/talentcurate/api:latest
+    environment:
+      - NATS_URL=nats://nats:4222
+      - LIVEKIT_API_KEY=devkey
+      - LIVEKIT_API_SECRET=talentcurate_interview_secret_key_32_chars_min
+      - LIVEKIT_URL=http://livekit:7880
+      - DATABASE_URL=postgres://interviewadmin:interviewpass@db:5432/interviewdb?sslmode=disable
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@talentcurate.com}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
+      - ADMIN_NAME=${ADMIN_NAME:-System Admin}
+      - METRICS_PORT=8080
+    restart: unless-stopped
+    depends_on:
+      nats:
+        condition: service_started
+      livekit:
+        condition: service_started
+      db:
+        condition: service_healthy
+
+  worker:
+    image: ghcr.io/dhawalhost/talentcurate/worker:latest
+    environment:
+      - NATS_URL=nats://nats:4222
+      - METRICS_PORT=9090
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/sandbox:/tmp/sandbox
+    privileged: true
+    restart: unless-stopped
+    depends_on:
+      - nats
+
+  frontend:
+    image: ghcr.io/dhawalhost/talentcurate/frontend:latest
+    ports:
+      - "8085:80"
+    restart: unless-stopped
+    depends_on:
+      - api-gateway
+    x-casaos:
+      container_http_port: "80"
+      show_in_app_grid: true
+
+  livekit:
+    image: livekit/livekit-server:latest
+    command: --config /livekit.yaml
+    volumes:
+      - ./livekit.yaml:/livekit.yaml
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "50000-50010:50000-50010/udp"
+    environment:
+      - 'LIVEKIT_KEYS=devkey: talentcurate_interview_secret_key_32_chars_min'
+    restart: unless-stopped
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    restart: unless-stopped
+
+  minio-setup:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set local http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb --ignore-existing local/recordings;
+      /usr/bin/mc anonymous set public local/recordings;
+      exit 0;
+      "
+
+  livekit-egress:
+    image: livekit/egress:latest
+    environment:
+      - EGRESS_CONFIG_FILE=/out/egress.yaml
+      - LIVEKIT_INSECURE=true
+    volumes:
+      - ./egress.yaml:/out/egress.yaml
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+    restart: unless-stopped
+    depends_on:
+      - livekit
+      - redis
+      - minio
+
+volumes:
+  postgres_data:
+  minio_data:

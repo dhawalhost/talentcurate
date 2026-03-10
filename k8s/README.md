@@ -57,3 +57,12 @@ This repository is pre-configured for **ArgoCD**. You can find the Application m
    kubectl apply -f argocd/talentcurate-dev.yaml
    ```
 3. ArgoCD will automatically track the `main` branch and synchronize the `k8s/overlays/dev` path to your cluster.
+
+## CI/CD Pipeline (GHCR Automation)
+The repository is equipped with a GitHub Actions workflow (`.github/workflows/ci.yml`) that:
+1.  Triggers on every **push** or **PR** to the `main` branch.
+2.  Builds Docker images for **Frontend**, **API**, and **Worker**.
+3.  Automatically pushes them to the **GitHub Container Registry (GHCR)**.
+4.  Tags images with the short Git SHA and replicates the `latest` tag for the newest stable main build.
+
+To use these images in your deployment, ensure your K8s cluster has permissions to pull from GHCR.
