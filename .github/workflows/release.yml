@@ -1,0 +1,105 @@
+name: Release (Build & Push to GHCR)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g., v1.0.1)'
+        required: true
+        default: 'latest'
+      deploy_env:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'none'
+        type: choice
+        options:
+          - dev
+          - prod
+          - none
+  push:
+    tags:
+      - 'v*'
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        component: [api, worker, frontend]
+        include:
+          - component: api
+            file: ./api.Dockerfile
+            image: ghcr.io/${{ github.repository }}/api
+          - component: worker
+            file: ./worker.Dockerfile
+            image: ghcr.io/${{ github.repository }}/worker
+          - component: frontend
+            file: ./frontend/Dockerfile
+            image: ghcr.io/${{ github.repository }}/frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ matrix.image }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=sha
+            type=raw,value=${{ github.event.inputs.version }},enable=${{ github.event_name == 'workflow_dispatch' }}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ matrix.file }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    needs: build-and-push
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_env != 'none'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update Kubernetes resources
+        run: |
+          # Install kustomize
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          mv kustomize /usr/local/bin/
+          
+          cd k8s/overlays/${{ github.event.inputs.deploy_env }}
+          kustomize edit set image ghcr.io/${{ github.repository }}/api=ghcr.io/${{ github.repository }}/api:${{ github.event.inputs.version }}
+          kustomize edit set image ghcr.io/${{ github.repository }}/worker=ghcr.io/${{ github.repository }}/worker:${{ github.event.inputs.version }}
+          kustomize edit set image ghcr.io/${{ github.repository }}/frontend=ghcr.io/${{ github.repository }}/frontend:${{ github.event.inputs.version }}
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "deploy: update ${{ github.event.inputs.deploy_env }} to ${{ github.event.inputs.version }}"
+          git push
